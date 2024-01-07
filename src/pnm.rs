@@ -17,24 +17,19 @@ impl PPMImageParser {
             .lines()
             .filter(|line| !line.starts_with("#"))
             .filter(|line| !line.is_empty())
+            .collect();
+        let binding = content_lines.join(" ").replace("  ", " ");
+        let content: Vec<_> = binding
+            .split(" ")
+            .filter(|v| !v.is_empty())
             .skip(1)
             .collect();
 
-        let width_and_height: Vec<_> = content_lines.get(0)
-            .expect(INCORRECT_FORMAT)
-            .split(" ")
-            .filter(|s| !s.is_empty())
-            .collect();
-        let width_and_height_len = width_and_height.len();
-        if (width_and_height_len < 2) {
-            panic!("{}", INCORRECT_FORMAT)
-        }
+        let width: i32 = content.get(0).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
+        let height: i32 = content.get(1).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
 
-        let width: i32 = width_and_height.get(0).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
-        let height: i32 = width_and_height.get(1).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
-
-        let image_info_start_line_index = 2;
-        let mut created_pixels_count = 0;
+        let image_info_start_index = 3;
+        let mut used_values_count = 0;
 
         let mut rgb_image = RGBImage::new();
 
@@ -42,21 +37,16 @@ impl PPMImageParser {
             let mut rgb_line = RGBLine::new();
 
             for _ in (0..width) {
-                let line_index = image_info_start_line_index + created_pixels_count;
-                let line = content_lines.get(line_index).expect(INCORRECT_FORMAT);
-                let pixel_line_info: Vec<_> = line.split(" ").collect();
-
+                let index = image_info_start_index + used_values_count;
                 let rgb_pixel = RGBPixel {
-                    r: self.parse_u8_value(&pixel_line_info, 0),
-                    g: self.parse_u8_value(&pixel_line_info, 1),
-                    b: self.parse_u8_value(&pixel_line_info, 2)
+                    r: self.parse_u8_value(content.get(index).unwrap()),
+                    g: self.parse_u8_value(content.get(index + 1).unwrap()),
+                    b: self.parse_u8_value(content.get(index + 2).unwrap()),
                 };
-
                 rgb_line.add_rgb_pixel(rgb_pixel);
 
-                created_pixels_count += 1;
+                used_values_count += 3;
             }
-
 
             rgb_image.add_rgb_line(rgb_line);
         }
@@ -64,9 +54,8 @@ impl PPMImageParser {
         rgb_image
     }
 
-    fn parse_u8_value(&self, pixel_line_info: &Vec<&str>, index: usize) -> u8 {
-        let value: u16 = pixel_line_info.get(index)
-            .expect(INCORRECT_FORMAT)
+    fn parse_u8_value(&self, u8_string: &str) -> u8 {
+        let value: u16 = u8_string
             .to_string()
             .parse()
             .unwrap();
