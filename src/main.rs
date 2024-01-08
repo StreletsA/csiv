@@ -10,7 +10,7 @@ mod pnm;
 
 fn main() {
     let mut buf: Vec<u8> = Vec::new();
-    File::open("C:\\Users\\astrelets\\Documents\\p3_image.ppm").unwrap().read_to_end(&mut buf).unwrap();
+    File::open("C:\\Users\\astrelets\\Downloads\\photo_2022-05-04_17-03-35.ppm").unwrap().read_to_end(&mut buf).unwrap();
 
     let viewer = PPMImageParser;
     let rgb_image = viewer.get_image(&buf);
