@@ -175,13 +175,6 @@ impl PPMImageParser {
 
         rgb_image
     }
-
-    fn get_byte(&self, content: &String, index: usize) -> u8 {
-        let chars: Vec<_> = content.chars().collect();
-        let ch = chars.get(index).unwrap();
-
-        *ch as u8
-    }
 }
 
 impl ImageParser for PPMImageParser {
