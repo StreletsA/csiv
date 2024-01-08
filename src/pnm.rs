@@ -11,24 +11,11 @@ impl PPMImageParser {
         return PPMImageParser;
     }
 
-    fn get_image_p3(&self, bytes: &Vec<u8>) -> RGBImage {
-        let binding = String::from_utf8(bytes.to_vec()).unwrap();
-        let content_lines: Vec<_> = binding
-            .lines()
-            .filter(|line| !line.starts_with("#"))
-            .filter(|line| !line.is_empty())
-            .collect();
-        let binding = content_lines.join(" ").replace("  ", " ");
-        let content: Vec<_> = binding
-            .split(" ")
-            .filter(|v| !v.is_empty())
-            .skip(1)
-            .collect();
+    fn get_image_p3(&self, content: &Vec<&str>) -> RGBImage {
+        let width: i32 = content.get(1).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
+        let height: i32 = content.get(2).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
 
-        let width: i32 = content.get(0).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
-        let height: i32 = content.get(1).expect(INCORRECT_FORMAT).to_string().parse().unwrap();
-
-        let image_info_start_index = 3;
+        let image_info_start_index = 4;
         let mut used_values_count = 0;
 
         let mut rgb_image = RGBImage::new();
@@ -67,7 +54,7 @@ impl PPMImageParser {
         return value as u8;
     }
 
-    fn get_image_p6(&self, bytes: &Vec<u8>) -> RGBImage {
+    fn get_image_p6(&self, content: &Vec<&str>) -> RGBImage {
         todo!()
     }
 }
@@ -79,14 +66,23 @@ impl ImageParser for PPMImageParser {
             panic!("No content!")
         }
 
-        // First byte must be P symbol
-        bytes.get(0).filter(|byte| **byte == UTF8_P).expect(INCORRECT_FORMAT);
-        // Second byte must be 3 or 6
-        let format_type = bytes.get(1).expect(INCORRECT_FORMAT);
-        if (*format_type == UTF8_3) {
-            self.get_image_p3(bytes)
-        } else if (*format_type == UTF8_6) {
-            self.get_image_p6(bytes)
+        let binding = String::from_utf8(bytes.to_vec()).unwrap();
+        let content_lines: Vec<_> = binding
+            .lines()
+            .filter(|line| !line.starts_with("#"))
+            .filter(|line| !line.is_empty())
+            .collect();
+        let binding = content_lines.join(" ").replace("  ", " ");
+        let content: Vec<_> = binding
+            .split(" ")
+            .filter(|v| !v.is_empty())
+            .collect();
+
+        let format_type = content.get(0).expect(INCORRECT_FORMAT);
+        if (*format_type == "P3") {
+            self.get_image_p3(&content)
+        } else if (*format_type == "P6") {
+            self.get_image_p6(&content)
         } else {
             panic!("{}", INCORRECT_FORMAT)
         }
