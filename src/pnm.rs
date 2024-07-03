@@ -1,3 +1,4 @@
+use std::fs::File;
 use std::io::Read;
 use crate::commons::{ImageParser, RGBImage, RGBLine, RGBPixel};
 
@@ -178,20 +179,23 @@ impl PPMImageParser {
 }
 
 impl ImageParser for PPMImageParser {
-    fn get_image(&self, bytes: &Vec<u8>) -> RGBImage {
-        let content_length = bytes.len();
+    fn get_image(&self, image_path: &String) -> RGBImage {
+        let mut buf: Vec<u8> = Vec::new();
+        File::open(image_path).unwrap().read_to_end(&mut buf).unwrap();
+
+        let content_length = buf.len();
         if (content_length < 10) {
             panic!("No content!")
         }
 
         // First byte must be P symbol
-        bytes.get(0).filter(|byte| **byte == UTF8_P).expect(INCORRECT_FORMAT);
+        buf.get(0).filter(|byte| **byte == UTF8_P).expect(INCORRECT_FORMAT);
         // Second byte must be 3 or 6
-        let format_type = bytes.get(1).expect(INCORRECT_FORMAT);
+        let format_type = buf.get(1).expect(INCORRECT_FORMAT);
         if (*format_type == UTF8_3) {
-            self.get_image_p3(bytes)
+            self.get_image_p3(&buf)
         } else if (*format_type == UTF8_6) {
-            self.get_image_p6(bytes)
+            self.get_image_p6(&buf)
         } else {
             panic!("{}", INCORRECT_FORMAT)
         }

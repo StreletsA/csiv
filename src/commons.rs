@@ -1,6 +1,4 @@
-use std::thread::sleep;
-use std::time::Duration;
-use colored::{ColoredString, Colorize, Color};
+use colored::{Color, Colorize};
 
 #[derive(Debug)]
 pub struct RGBPixel {
@@ -10,7 +8,7 @@ pub struct RGBPixel {
 }
 
 pub struct RGBLine {
-    width: usize,
+    width: u32,
     rgb_pixels: Vec<RGBPixel>
 }
 
@@ -26,8 +24,8 @@ impl RGBLine {
 }
 
 pub struct RGBImage {
-    width: usize,
-    height: usize,
+    width: u32,
+    height: u32,
     rgb_lines: Vec<RGBLine>
 }
 
@@ -36,7 +34,7 @@ impl RGBImage {
         RGBImage { width: 0, height: 0, rgb_lines: Vec::new() }
     }
 
-    pub fn of(width: usize, height: usize) -> RGBImage {
+    pub fn of(width: u32, height: u32) -> RGBImage {
         let mut rgb_lines: Vec<RGBLine> = Vec::new();
         for _ in (0..height) {
             let mut rgb_line = RGBLine::new();
@@ -64,12 +62,8 @@ impl RGBImage {
     }
 }
 
-pub enum ImageExtension {
-    PPM
-}
-
 pub trait ImageParser {
-    fn get_image(&self, bytes: &Vec<u8>) -> RGBImage;
+    fn get_image(&self, image_path: &String) -> RGBImage;
 }
 
 pub trait ImagePrinter {
