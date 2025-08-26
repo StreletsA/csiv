@@ -1,5 +1,5 @@
 use image::GenericImageView;
-use image::io::Reader as ImageReader;
+use image::ImageReader;
 
 use crate::commons::{ImageParser, RGBImage, RGBLine, RGBPixel};
 

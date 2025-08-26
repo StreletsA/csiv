@@ -1,4 +1,3 @@
-use std::env;
 use std::ffi::OsStr;
 use std::io::Read;
 use std::path::Path;
@@ -6,25 +5,19 @@ use std::path::Path;
 use colored::Colorize;
 
 use crate::commons::{ConsoleImagePrinter, ImageParser, ImagePrinter};
-use crate::pnm::PPMImageParser;
 use crate::default::DefaultImageParser;
+use crate::pnm::PPMImageParser;
 
 mod commons;
 mod pnm;
 mod default;
+mod cli;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let image_path: &String = &args[1];
-    let mut image_scale: f32 = 1f32;
-
-    if args.len() > 2 {
-        image_scale = args[2].parse().unwrap();
-    }
-
-    let rgb_image = define_image_parser(image_path).get_image(image_path);
+    let csiv_params = cli::parse_params();
+    let rgb_image = define_image_parser(&csiv_params.file_path).get_image(&csiv_params.file_path);
     let image_printer = ConsoleImagePrinter;
-    image_printer.print_image_scaled(&rgb_image, image_scale);
+    image_printer.print_image_scaled(&rgb_image, csiv_params.scale);
 }
 
 fn define_image_parser(image_path: &String) -> Box<dyn ImageParser> {
